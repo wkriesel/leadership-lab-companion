@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leadership Lab — Mission Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+:root {
+  /* AI Forward Design System */
+  --orange: #F7931E;
+  --orange-light: #FBBA5C;
+  --orange-glow: rgba(247, 147, 30, 0.12);
+  --blue: #1F3A5F;
+  --blue-light: #2E5A8E;
+  --sage: #7FA98E;
+  --sage-light: #A3C4AF;
+  --sand: #E8D9C5;
+  --sand-light: #F0E8DC;
+  --charcoal: #2F2F2F;
+  --cloud: #F5F5F5;
+  --white: #FFFFFF;
+  --border: #E0E0E0;
+  --muted: #8A8A8A;
+  --text-primary: #2F2F2F;
+  --text-secondary: #5A5A5A;
+  --accent-red: #C0392B;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.10);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--cloud);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER — MISSION CONTROL BAR
+   ═══════════════════════════════════════════ */
+.mission-header {
+  background: var(--blue);
+  color: white;
+  padding: 28px 40px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-brand h1 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.header-brand .subtitle {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  font-weight: 300;
+  margin-top: 2px;
+}
+.header-meta {
+  text-align: right;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+.header-meta .date { font-weight: 600; }
+.live-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #4ADE80;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION TABS
+   ═══════════════════════════════════════════ */
+.nav-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  position: sticky;
+  top: 82px;
+  z-index: 99;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+.nav-tab {
+  padding: 14px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-tab:hover { color: var(--orange); }
+.nav-tab.active {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+.nav-tab .tab-icon { font-size: 1.1rem; }
+.nav-tab .tab-badge {
+  background: var(--orange);
+  color: white;
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT AREA
+   ═══════════════════════════════════════════ */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 40px 80px;
+}
+
+/* Panel visibility */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════
+   DASHBOARD PANEL
+   ═══════════════════════════════════════════ */
+.dashboard-greeting {
+  margin-bottom: 28px;
+}
+.dashboard-greeting h2 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.8rem;
+  color: var(--blue);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.dashboard-greeting p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 600px;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.icon {
+  color: #1F3A5F;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+.dash-card {
+  background: var(--white);
+  border: 1px solid #E3E7ED;
+  box-shadow: none;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.dash-card:hover {
+  transform: translateY(-2px);
+  border-color: #1F3A5F;
+}
+.dash-card h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+.dash-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.dash-card .card-status {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Session agenda timeline */
+.agenda-timeline {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.agenda-timeline h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--blue);
+}
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.timeline-dot.active { background: var(--orange); box-shadow: 0 0 0 4px var(--orange-glow); }
+.timeline-dot.completed { background: var(--sage); }
+.timeline-text .time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.timeline-text .label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════
+   HOT TAKES PANEL
+   ═══════════════════════════════════════════ */
+.hottakes-intro {
+  background: linear-gradient(135deg, #FFF7EB, #FDEBD0);
+  border: 1px solid var(--orange-light);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.hottakes-intro h2 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--blue);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.hottakes-intro p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.scenario-card {
+  background: var(--white);
+  border: 1px solid #E3E7ED;
+  box-shadow: none;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+.scenario-card:hover {
+  border-color: #1F3A5F;
+}
+.scenario-card.answered {
+  border-color: var(--sage);
+  background: linear-gradient(135deg, #F0F7F2, var(--white));
+}
+.scenario-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+.scenario-text {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.scenario-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.option-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.option-btn:hover {
+  border-color: var(--orange-light);
+  background: var(--orange-glow);
+}
+.option-btn.selected {
+  border-color: var(--orange);
+  background: var(--orange-glow);
+  font-weight: 600;
+}
+.option-btn.correct {
+  border-color: var(--sage);
+  background: rgba(127, 169, 142, 0.12);
+}
+.option-btn.incorrect {
+  border-color: var(--accent-red);
+  background: rgba(192, 57, 43, 0.06);
+}
+.option-letter {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.option-btn.selected .option-letter {
+  background: var(--orange);
+  color: white;
+}
+.scenario-explanation {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(127, 169, 142, 0.08);
+  border-left: 3px solid var(--sage);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: none;
+}
+.scenario-explanation.visible { display: block; animation: fadeIn 0.3s ease; }
+.scenario-explanation strong { color: var(--blue); }
+
+.hottakes-progress {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.progress-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--sage));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════
+   IMPACT STORIES PANEL
+   ═══════════════════════════════════════════ */
+.stories-intro {
+  background: linear-gradient(135deg, #F0F7F2, #E2EDE6);
+  border: 1px solid var(--sage);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.stories-intro h2 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--blue);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.stories-intro blockquote {
+  font-style: italic;
+  color: var(--blue);
+  border-left: 3px solid var(--sage);
+  padding-left: 16px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+.reflection-form {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.form-section {
+  margin-bottom: 24px;
+}
+.form-section:last-child { margin-bottom: 0; }
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: block;
+}
+.form-sublabel {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.confidence-scale {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.scale-btn {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scale-btn:hover { border-color: var(--orange-light); }
+.scale-btn.selected {
+  background: var(--orange);
+  color: white;
+  border-color: var(--orange);
+}
+.scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+textarea.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s;
+  color: var(--text-primary);
+  background: var(--cloud);
+}
+textarea.form-textarea:focus {
+  outline: none;
+  border-color: var(--blue-light);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.08);
+}
+
+/* Voice recording stretch */
+.voice-recorder {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--cloud);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+}
+.record-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-red);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.record-btn:hover { transform: scale(1.05); }
+.record-btn.recording {
+  background: #DC2626;
+  animation: pulse 1s infinite;
+}
+.voice-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.voice-timer {
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-red);
+}
+
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn:hover { background: var(--blue-light); transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Stories wall */
+.stories-wall {
+  margin-top: 32px;
+}
+.stories-wall h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.story-card {
+  background: var(--white);
+  border: 1px solid #E3E7ED;
+  box-shadow: none;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.story-card:hover {
+  border-color: #1F3A5F;
+}
+.story-card .story-rating {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.story-card .story-rating .star { color: var(--orange); font-size: 0.9rem; }
+.story-card .story-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-style: italic;
+}
+.story-card .story-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════
+   SANDBOX PANEL — CONSULTANCY PROTOCOL
+   ═══════════════════════════════════════════ */
+.sandbox-header {
+  background: linear-gradient(135deg, #EEF2F7, #DCE4ED);
+  border: 1px solid var(--blue-light);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.sandbox-header h2 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--blue);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Protocol timer */
+.protocol-timer {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.timer-display {
+  font-family: monospace;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--blue);
+  letter-spacing: 2px;
+  min-width: 130px;
+}
+.timer-phase {
+  flex: 1;
+}
+.timer-phase .phase-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.timer-phase .phase-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.timer-controls {
+  display: flex;
+  gap: 8px;
+}
+.timer-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  color: var(--text-primary);
+}
+.timer-btn.primary {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+}
+.timer-btn:hover { transform: translateY(-1px); }
+
+/* Phase indicator pills */
+.phase-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.phase-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.phase-pill.active {
+  background: var(--blue);
+  color: white;
+}
+.phase-pill.completed {
+  background: var(--sage);
+  color: white;
+}
+
+/* Group selector */
+.group-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.group-btn {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.group-btn:hover { border-color: var(--orange-light); }
+.group-btn.active {
+  border-color: var(--blue);
+  background: rgba(31, 58, 95, 0.04);
+}
+.group-btn .group-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.group-btn .group-count {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Group notepad */
+.group-notepad {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.notepad-header {
+  background: var(--blue);
+  color: white;
+  padding: 14px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notepad-header .live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.notepad-body {
+  padding: 20px;
+}
+.notepad-section {
+  margin-bottom: 20px;
+}
+.notepad-section:last-child { margin-bottom: 0; }
+.notepad-section label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 8px;
+}
+.notepad-section textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  color: var(--text-primary);
+  background: var(--cloud);
+}
+.notepad-section textarea:focus {
+  outline: none;
+  border-color: var(--blue-light);
+  background: var(--white);
+}
+
+/* ═══════════════════════════════════════════
+   NEXT STEPS PANEL
+   ═══════════════════════════════════════════ */
+.nextsteps-intro {
+  background: linear-gradient(135deg, var(--sand-light), var(--sand));
+  border: 1px solid var(--orange-light);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.nextsteps-intro h2 {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--blue);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.commitment-form {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+.commitments-wall {
+  margin-top: 32px;
+}
+.commitments-wall h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.commitment-card {
+  background: var(--white);
+  border: 1px solid #E3E7ED;
+  border-left: 4px solid var(--orange);
+  box-shadow: none;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+.commitment-card:hover {
+  border-color: #1F3A5F;
+}
+.commitment-card .commit-action {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.commitment-card .commit-timeline {
+  font-size: 0.8rem;
+  color: var(--sage);
+  margin-top: 4px;
+}
+.commitment-card .commit-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .mission-header { padding: 16px 20px; }
+  .header-brand h1 { font-size: 1.2rem; }
+  .nav-bar { padding: 0 16px; }
+  .nav-tab { padding: 12px 14px; font-size: 0.8rem; }
+  .main-content { padding: 16px 20px 40px; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .group-selector { flex-wrap: wrap; }
+  .group-btn { flex: 1 1 calc(50% - 5px); }
+  .timer-display { font-size: 1.8rem; }
+  .protocol-timer { flex-direction: column; align-items: flex-start; }
+  .confidence-scale { flex-wrap: wrap; }
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--charcoal);
+  color: white;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.toast.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════ -->
+<header class="mission-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <h1>Leadership Lab — Mission Control</h1>
+      <div class="subtitle">From Reflection to Action: AI in Our Schools</div>
+    </div>
+    <div class="header-meta">
+      <div class="date">April 15, 2026</div>
+      <div><span class="live-pulse"></span> Live Session</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════ -->
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-tab active" data-panel="dashboard">
+      <span class="tab-icon">&#9673;</span> Dashboard
+    </button>
+    <button class="nav-tab" data-panel="hottakes">
+      <span class="tab-icon">&#9889;</span> Hot Takes
+      <span class="tab-badge" id="hottakes-badge">6</span>
+    </button>
+    <button class="nav-tab" data-panel="stories">
+      <span class="tab-icon">&#10029;</span> Impact Stories
+    </button>
+    <button class="nav-tab" data-panel="sandbox">
+      <span class="tab-icon">&#9881;</span> Sandbox
+    </button>
+    <button class="nav-tab" data-panel="nextsteps">
+      <span class="tab-icon">&#10148;</span> Next Steps
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="dashboard-greeting">
+      <h2>Learning is Joyful. Learning is Painful.</h2>
+      <p>Welcome to your Mission Control. Four stations. One throughline: turning what we know about AI into what we do next.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="switchPanel('hottakes')">
+        <h3><span class="icon">&#9889;</span> Hot Takes</h3>
+        <p>Test your instincts against the OCDE AI Staff Guidelines. Six scenarios, real stakes.</p>
+        <div class="card-status" style="color: var(--orange);" id="dash-hottakes-status">&#9679; Ready to start</div>
+      </div>
+      <div class="dash-card" onclick="switchPanel('stories')">
+        <h3><span class="icon">&#10029;</span> Impact Stories</h3>
+        <p>Share what happened when you brought AI into your work. The breakthroughs. The surprises.</p>
+        <div class="card-status" style="color: var(--sage);" id="dash-stories-status">&#9679; Collecting responses</div>
+      </div>
+      <div class="dash-card" onclick="switchPanel('sandbox')">
+        <h3><span class="icon">&#9881;</span> Consultancy Sandbox</h3>
+        <p>Four groups. Four puzzles. A timed protocol to move from "stuck" to "strategy."</p>
+        <div class="card-status" style="color: var(--blue-light);" id="dash-sandbox-status">&#9679; 4 groups ready</div>
+      </div>
+      <div class="dash-card" onclick="switchPanel('nextsteps')">
+        <h3><span class="icon">&#10148;</span> Next Steps</h3>
+        <p>Lock in your commitment. What will you do in the next two weeks to move this forward?</p>
+        <div class="card-status" style="color: #8B5CF6;" id="dash-nextsteps-status">&#9679; Awaiting commitments</div>
+      </div>
+    </div>
+
+    <div class="agenda-timeline">
+      <h3>Session Flow</h3>
+      <div class="timeline-item">
+        <div class="timeline-dot active"></div>
+        <div class="timeline-text">
+          <div class="time">Opening — 10 min</div>
+          <div class="label">Welcome & Dashboard Orientation</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-text">
+          <div class="time">Block 1 — 20 min</div>
+          <div class="label">Hot Takes: OCDE AI Guidelines Scenarios</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-text">
+          <div class="time">Block 2 — 15 min</div>
+          <div class="label">Impact Stories: Reflections from the Workshop</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-text">
+          <div class="time">Block 3 — 30 min</div>
+          <div class="label">Consultancy Sandbox: Group Protocol</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-text">
+          <div class="time">Closing — 10 min</div>
+          <div class="label">Next Steps & Commitments</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HOT TAKES ═══ -->
+  <div class="panel" id="panel-hottakes">
+    <div class="hottakes-intro">
+      <h2>&#9889; Hot Takes: Know Your AI Policy</h2>
+      <p>Six real-world scenarios drawn from the OCDE AI Staff Guidelines. Read each situation, pick your response, and discover what the policy actually says. No judgment — just sharpening our instincts together.</p>
+    </div>
+
+    <div class="hottakes-progress">
+      <span class="progress-label"><span id="ht-count">0</span> / 6 answered</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="ht-progress"></div>
+      </div>
+    </div>
+
+    <div id="scenarios-container"></div>
+  </div>
+
+  <!-- ═══ IMPACT STORIES ═══ -->
+  <div class="panel" id="panel-stories">
+    <div class="stories-intro">
+      <h2>&#10029; Impact Stories</h2>
+      <p>In our last session, you personalized ChatGPT and built your own AI assistant. Now tell us: what happened next?</p>
+      <blockquote>"I had a student who finally had a thought partner... it changed everything for them."</blockquote>
+    </div>
+
+    <div class="reflection-form">
+      <div class="form-section">
+        <label class="form-label">Since the workshop, how has your confidence with AI tools shifted?</label>
+        <div class="confidence-scale" id="confidence-scale">
+          <button class="scale-btn" data-val="1">1</button>
+          <button class="scale-btn" data-val="2">2</button>
+          <button class="scale-btn" data-val="3">3</button>
+          <button class="scale-btn" data-val="4">4</button>
+          <button class="scale-btn" data-val="5">5</button>
+        </div>
+        <div class="scale-labels">
+          <span>Still exploring</span>
+          <span>Fully integrated</span>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">What surprised you most about using your AI assistant?</label>
+        <span class="form-sublabel">A moment, a result, a conversation that shifted your thinking.</span>
+        <textarea class="form-textarea" id="surprise-text" placeholder="Tell us what happened..."></textarea>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Share one impact story — a moment when AI made a real difference for you or your students.</label>
+        <textarea class="form-textarea" id="impact-text" placeholder="Describe the moment..."></textarea>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">&#127908; Voice Note (Stretch Goal)</label>
+        <div class="voice-recorder">
+          <button class="record-btn" id="record-btn" onclick="toggleRecording()">&#9679;</button>
+          <div>
+            <div class="voice-status" id="voice-status">Tap to record your story (up to 2 min)</div>
+            <div class="voice-timer" id="voice-timer"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submitStory()">
+        &#10148; Share My Story
+      </button>
+    </div>
+
+    <div class="stories-wall" id="stories-wall">
+      <h3>Stories from the Room</h3>
+      <div id="stories-feed"></div>
+    </div>
+  </div>
+
+  <!-- ═══ SANDBOX ═══ -->
+  <div class="panel" id="panel-sandbox">
+    <div class="sandbox-header">
+      <h2>&#9881; Consultancy Sandbox</h2>
+      <p>Each group works through the consultancy protocol: one presenter shares their puzzle, the group listens, questions, brainstorms, and the presenter reflects. Your digital notepad captures it all.</p>
+    </div>
+
+    <!-- Protocol Timer -->
+    <div class="protocol-timer">
+      <div class="timer-display" id="timer-display">05:00</div>
+      <div class="timer-phase">
+        <div class="phase-name" id="phase-name">1. Problem Pitch</div>
+        <div class="phase-desc" id="phase-desc">Presenter shares the puzzle and framing question</div>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn primary" id="timer-start-btn" onclick="toggleTimer()">&#9654; Start</button>
+        <button class="timer-btn" onclick="resetTimer()">&#8634; Reset</button>
+        <button class="timer-btn" onclick="nextPhase()">Next &#10148;</button>
+      </div>
+    </div>
+
+    <!-- Phase Pills -->
+    <div class="phase-pills" id="phase-pills">
+      <button class="phase-pill active" data-phase="0">1. Pitch (5m)</button>
+      <button class="phase-pill" data-phase="1">2. Clarify (2m)</button>
+      <button class="phase-pill" data-phase="2">3. Probe (4m)</button>
+      <button class="phase-pill" data-phase="3">4. Brainstorm (6m)</button>
+      <button class="phase-pill" data-phase="4">5. Reflect (2m)</button>
+      <button class="phase-pill" data-phase="5">6. Debrief (2m)</button>
+    </div>
+
+    <!-- Group Selector -->
+    <div class="group-selector">
+      <button class="group-btn active" data-group="0" onclick="switchGroup(0)">
+        <div class="group-name">Group A</div>
+        <div class="group-count">Notepad active</div>
+      </button>
+      <button class="group-btn" data-group="1" onclick="switchGroup(1)">
+        <div class="group-name">Group B</div>
+        <div class="group-count">Notepad active</div>
+      </button>
+      <button class="group-btn" data-group="2" onclick="switchGroup(2)">
+        <div class="group-name">Group C</div>
+        <div class="group-count">Notepad active</div>
+      </button>
+      <button class="group-btn" data-group="3" onclick="switchGroup(3)">
+        <div class="group-name">Group D</div>
+        <div class="group-count">Notepad active</div>
+      </button>
+    </div>
+
+    <!-- Group Notepad -->
+    <div class="group-notepad">
+      <div class="notepad-header">
+        <span id="notepad-title">Group A — Consultancy Notepad</span>
+        <div class="live-badge"><span class="live-pulse"></span> Live</div>
+      </div>
+      <div class="notepad-body">
+        <div class="notepad-section">
+          <label>The Puzzle</label>
+          <textarea id="notepad-puzzle" placeholder="What challenge or question does the presenter bring? What's the framing question for the group?" onchange="saveNotepad()"></textarea>
+        </div>
+        <div class="notepad-section">
+          <label>Clarifying & Probing Questions</label>
+          <textarea id="notepad-questions" placeholder="Capture key questions the group asked..." onchange="saveNotepad()"></textarea>
+        </div>
+        <div class="notepad-section">
+          <label>Brainstorm Ideas</label>
+          <textarea id="notepad-brainstorm" placeholder="What strategies, resources, or new angles emerged?" onchange="saveNotepad()"></textarea>
+        </div>
+        <div class="notepad-section">
+          <label>Presenter Reflections</label>
+          <textarea id="notepad-reflections" placeholder="What did the presenter hear? What surprised them? What will they try?" onchange="saveNotepad()"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NEXT STEPS ═══ -->
+  <div class="panel" id="panel-nextsteps">
+    <div class="nextsteps-intro">
+      <h2>&#10148; Next Steps: From Insight to Action</h2>
+      <p>You've reviewed the policy. You've shared your stories. You've consulted with peers. Now — what will you do with all of it? Lock in one commitment you'll act on in the next two weeks.</p>
+    </div>
+
+    <div class="commitment-form">
+      <div class="form-section">
+        <label class="form-label">In the next two weeks, I will...</label>
+        <textarea class="form-textarea" id="commitment-action" placeholder="Be specific. What will you do, for whom, and by when?"></textarea>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">What support do you need to make this happen?</label>
+        <textarea class="form-textarea" id="commitment-support" placeholder="Tools, people, time, permission..." style="min-height: 70px;"></textarea>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Who will you share this commitment with for accountability?</label>
+        <textarea class="form-textarea" id="commitment-partner" placeholder="Name a colleague, a team, or a group..." style="min-height: 50px;"></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="submitCommitment()">
+        &#10148; Lock In My Commitment
+      </button>
+    </div>
+
+    <div class="commitments-wall" id="commitments-wall">
+      <h3>Commitments from the Room</h3>
+      <div id="commitments-feed"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA STORE (Firebase-ready — swap with Firestore)
+// ═══════════════════════════════════════════
+const store = {
+  stories: [],
+  commitments: [],
+  hottakesAnswered: 0,
+  groups: [
+    { puzzle: '', questions: '', brainstorm: '', reflections: '' },
+    { puzzle: '', questions: '', brainstorm: '', reflections: '' },
+    { puzzle: '', questions: '', brainstorm: '', reflections: '' },
+    { puzzle: '', questions: '', brainstorm: '', reflections: '' }
+  ],
+  currentGroup: 0,
+  confidenceRating: 0
+};
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchPanel(tab.dataset.panel));
+});
+
+function switchPanel(panelName) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-panel="${panelName}"]`).classList.add('active');
+  document.getElementById(`panel-${panelName}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+// HOT TAKES — SCENARIO ENGINE
+// ═══════════════════════════════════════════
+const scenarios = [
+  {
+    id: 1,
+    scenario: "A principal uses ChatGPT to draft a parent communication about a student's behavioral incident. The draft includes the student's full name and specific details from their disciplinary record.",
+    options: [
+      { letter: 'A', text: "This is fine — the email would go to the parent anyway.", correct: false },
+      { letter: 'B', text: "This violates policy — student PII should never enter public AI systems.", correct: true },
+      { letter: 'C', text: "It's okay if the principal reviews the draft before sending.", correct: false },
+      { letter: 'D', text: "It depends on whether ChatGPT stores the data.", correct: false }
+    ],
+    explanation: "<strong>Policy says: Prohibited.</strong> Section 5 of the OCDE AI Guidelines explicitly bans entering confidential, proprietary, or personally identifiable information (PII) into public or unapproved AI systems. Student records protected under FERPA cannot enter tools like free ChatGPT regardless of how the output is used. The correct move: draft the communication without identifying details in AI, then add specifics manually."
+  },
+  {
+    id: 2,
+    scenario: "A curriculum coordinator uses an OCDE-approved AI tool to generate a summary of assessment data trends across three schools. She includes the summary in a board presentation with the note: 'Data analysis prepared by [Name].'",
+    options: [
+      { letter: 'A', text: "Perfect — she reviewed it before sharing.", correct: false },
+      { letter: 'B', text: "She needs to disclose the AI contribution in her attribution.", correct: true },
+      { letter: 'C', text: "Only needs disclosure if AI wrote more than 50% of the content.", correct: false },
+      { letter: 'D', text: "Internal presentations don't require AI disclosure.", correct: false }
+    ],
+    explanation: "<strong>Policy says: Disclose.</strong> Section 7 (Transparency and Citation) requires staff to acknowledge AI use whenever it 'meaningfully contributes' to professional work — including analyzing data and creating presentations. An appropriate attribution: 'Prepared with AI assistance and reviewed for accuracy by [Name/Role].' This builds trust across the organization."
+  },
+  {
+    id: 3,
+    scenario: "A teacher finds a free AI tool online that translates parent communications into five languages instantly. It's not on OCDE's approved list, but it doesn't require uploading student data — just pasting text.",
+    options: [
+      { letter: 'A', text: "It's fine — no student data is involved.", correct: false },
+      { letter: 'B', text: "Prohibited — unapproved tools can't be used for OCDE-related work.", correct: true },
+      { letter: 'C', text: "Okay as long as the teacher checks the translations.", correct: false },
+      { letter: 'D', text: "Only a problem if the tool stores the text.", correct: false }
+    ],
+    explanation: "<strong>Policy says: Don't use it.</strong> Section 5 prohibits using unapproved or public AI tools for 'instructional, operational, administrative, or other OCDE-related purposes involving organizational data or communications.' Even without student PII, official school communications count. The responsible path: request that IT evaluate the tool for the approved list, or use an already-approved translation resource."
+  },
+  {
+    id: 4,
+    scenario: "A department head asks their team to use Gemini to brainstorm ideas for a new professional development series. The brainstorm session uses only generic educational topics — no student or staff data is shared.",
+    options: [
+      { letter: 'A', text: "This is a great use of AI — creative brainstorming with no protected data.", correct: true },
+      { letter: 'B', text: "Still prohibited — all AI use requires OCDE approval.", correct: false },
+      { letter: 'C', text: "Only okay if the supervisor approves it first.", correct: false },
+      { letter: 'D', text: "Needs a formal disclosure since it will influence decisions.", correct: false }
+    ],
+    explanation: "<strong>Policy says: Go for it.</strong> Section 4 (Responsible Use) encourages staff to use AI tools for 'generating summaries, outlines, visuals, or resource ideas to support instruction or professional projects.' When no protected data enters the system, this kind of creative brainstorming aligns perfectly with OCDE's commitment to innovation. Transparency disclosure applies if the brainstorm outputs directly shape published materials."
+  },
+  {
+    id: 5,
+    scenario: "An HR specialist uses an AI tool to screen and rank résumés for an open OCDE position, flagging candidates who best match the job description.",
+    options: [
+      { letter: 'A', text: "Efficient and innovative — exactly what AI should do.", correct: false },
+      { letter: 'B', text: "Okay if the HR specialist reviews every recommendation.", correct: false },
+      { letter: 'C', text: "Prohibited — AI cannot be used to evaluate staff without authorization.", correct: true },
+      { letter: 'D', text: "Fine as long as the AI tool is on the approved list.", correct: false }
+    ],
+    explanation: "<strong>Policy says: Not without authorization.</strong> Section 5 explicitly prohibits 'using AI to monitor, analyze, or evaluate staff, students, or community members without prior written authorization from OCDE leadership.' Even with good intentions, AI-based evaluation of people requires explicit approval. The safeguard protects against algorithmic bias and ensures human judgment stays central to hiring."
+  },
+  {
+    id: 6,
+    scenario: "A program director discovers that a contractor working on an OCDE project has been using a public AI tool to process student attendance data for a report deliverable.",
+    options: [
+      { letter: 'A', text: "Not OCDE's responsibility — the contractor manages their own tools.", correct: false },
+      { letter: 'B', text: "The contractor violated the guidelines — OCDE must act.", correct: true },
+      { letter: 'C', text: "Only a problem if the data was stored by the AI tool.", correct: false },
+      { letter: 'D', text: "Acceptable if the attendance data was de-identified.", correct: false }
+    ],
+    explanation: "<strong>Policy says: OCDE must act.</strong> Section 1 (Purpose and Scope) states the guidelines apply to 'all OCDE employees, contractors, consultants, vendors, and any individuals or organizations acting on behalf of OCDE.' Contractors using public AI on student attendance data — protected under FERPA — triggers a breach. The program director should report to IT or Data Privacy immediately."
+  }
+];
+
+function buildScenarios() {
+  const container = document.getElementById('scenarios-container');
+  container.innerHTML = scenarios.map((s, i) => `
+    <div class="scenario-card" id="scenario-${i}">
+      <div class="scenario-number">Scenario ${s.id} of 6</div>
+      <div class="scenario-text">${s.scenario}</div>
+      <div class="scenario-options" id="options-${i}">
+        ${s.options.map((opt, oi) => `
+          <button class="option-btn" data-scenario="${i}" data-option="${oi}" onclick="selectOption(${i}, ${oi})">
+            <span class="option-letter">${opt.letter}</span>
+            <span>${opt.text}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="scenario-explanation" id="explanation-${i}">${s.explanation}</div>
+    </div>
+  `).join('');
+}
+
+function selectOption(scenarioIdx, optionIdx) {
+  const card = document.getElementById(`scenario-${scenarioIdx}`);
+  if (card.classList.contains('answered')) return;
+
+  card.classList.add('answered');
+  const buttons = card.querySelectorAll('.option-btn');
+  const scenario = scenarios[scenarioIdx];
+
+  buttons.forEach((btn, i) => {
+    btn.style.pointerEvents = 'none';
+    if (scenario.options[i].correct) {
+      btn.classList.add('correct');
+    } else if (i === optionIdx && !scenario.options[i].correct) {
+      btn.classList.add('incorrect');
+    }
+    if (i === optionIdx) btn.classList.add('selected');
+  });
+
+  document.getElementById(`explanation-${scenarioIdx}`).classList.add('visible');
+
+  store.hottakesAnswered++;
+  document.getElementById('ht-count').textContent = store.hottakesAnswered;
+  document.getElementById('ht-progress').style.width = `${(store.hottakesAnswered / 6) * 100}%`;
+  document.getElementById('hottakes-badge').textContent = 6 - store.hottakesAnswered;
+
+  if (store.hottakesAnswered === 6) {
+    document.getElementById('dash-hottakes-status').innerHTML = '&#10003; Complete';
+    document.getElementById('dash-hottakes-status').style.color = 'var(--sage)';
+    showToast('All 6 scenarios complete — nice work!');
+  }
+}
+
+// ═══════════════════════════════════════════
+// IMPACT STORIES
+// ═══════════════════════════════════════════
+document.querySelectorAll('#confidence-scale .scale-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#confidence-scale .scale-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    store.confidenceRating = parseInt(btn.dataset.val);
+  });
+});
+
+function submitStory() {
+  const surprise = document.getElementById('surprise-text').value.trim();
+  const impact = document.getElementById('impact-text').value.trim();
+
+  if (!impact && !surprise) {
+    showToast('Share at least one reflection before submitting.');
+    return;
+  }
+
+  const story = {
+    confidence: store.confidenceRating,
+    surprise: surprise,
+    impact: impact,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  store.stories.push(story);
+  renderStories();
+
+  document.getElementById('surprise-text').value = '';
+  document.getElementById('impact-text').value = '';
+  document.querySelectorAll('#confidence-scale .scale-btn').forEach(b => b.classList.remove('selected'));
+  store.confidenceRating = 0;
+
+  showToast('Story shared — thank you!');
+  document.getElementById('dash-stories-status').innerHTML = `&#10029; ${store.stories.length} stories shared`;
+}
+
+function renderStories() {
+  const feed = document.getElementById('stories-feed');
+  feed.innerHTML = store.stories.map(s => `
+    <div class="story-card">
+      ${s.confidence ? `<div class="story-rating">${'&#9733;'.repeat(s.confidence)}${'&#9734;'.repeat(5 - s.confidence)}</div>` : ''}
+      ${s.impact ? `<div class="story-text">"${s.impact}"</div>` : ''}
+      ${s.surprise ? `<div class="story-text" style="margin-top: 8px; font-style: normal; color: var(--text-secondary); font-size: 0.85rem;"><strong>Surprise:</strong> ${s.surprise}</div>` : ''}
+      <div class="story-meta">Shared at ${s.time}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// VOICE RECORDING (Stretch Goal)
+// ═══════════════════════════════════════════
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingTimer = null;
+let recordingSeconds = 0;
+
+function toggleRecording() {
+  const btn = document.getElementById('record-btn');
+  const status = document.getElementById('voice-status');
+  const timer = document.getElementById('voice-timer');
+
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          status.textContent = 'Recording saved! (will attach to your story)';
+          timer.textContent = '';
+          clearInterval(recordingTimer);
+        };
+        mediaRecorder.start();
+        btn.classList.add('recording');
+        btn.innerHTML = '&#9632;';
+        status.textContent = 'Recording... tap to stop';
+        recordingSeconds = 0;
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const m = Math.floor(recordingSeconds / 60);
+          const s = recordingSeconds % 60;
+          timer.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+          if (recordingSeconds >= 120) {
+            mediaRecorder.stop();
+            btn.classList.remove('recording');
+            btn.innerHTML = '&#9679;';
+          }
+        }, 1000);
+      })
+      .catch(() => {
+        status.textContent = 'Microphone access denied. Use text instead.';
+      });
+  } else {
+    mediaRecorder.stop();
+    btn.classList.remove('recording');
+    btn.innerHTML = '&#9679;';
+  }
+}
+
+// ═══════════════════════════════════════════
+// SANDBOX — CONSULTANCY PROTOCOL
+// ═══════════════════════════════════════════
+const phases = [
+  { name: '1. Problem Pitch', desc: 'Presenter shares the puzzle and framing question', time: 300 },
+  { name: '2. Clarifying Questions', desc: 'Factual questions only — who, what, when, where, how', time: 120 },
+  { name: '3. Probing Questions', desc: 'Deeper questions — challenge assumptions, invite new angles', time: 240 },
+  { name: '4. Group Brainstorm', desc: 'Presenter listens silently. Group discusses in third person.', time: 360 },
+  { name: '5. Presenter Reflection', desc: 'What did you hear? What surprised you? What will you try?', time: 120 },
+  { name: '6. Protocol Debrief', desc: 'Quick group reflection: what worked, what to improve', time: 120 }
+];
+
+let currentPhase = 0;
+let timerInterval = null;
+let timeRemaining = phases[0].time;
+let timerRunning = false;
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeRemaining / 60);
+  const s = timeRemaining % 60;
+  document.getElementById('timer-display').textContent =
+    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function updatePhaseUI() {
+  document.getElementById('phase-name').textContent = phases[currentPhase].name;
+  document.getElementById('phase-desc').textContent = phases[currentPhase].desc;
+  document.querySelectorAll('.phase-pill').forEach((pill, i) => {
+    pill.classList.remove('active', 'completed');
+    if (i === currentPhase) pill.classList.add('active');
+    else if (i < currentPhase) pill.classList.add('completed');
+  });
+  timeRemaining = phases[currentPhase].time;
+  updateTimerDisplay();
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('timer-start-btn');
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    btn.innerHTML = '&#9654; Resume';
+  } else {
+    timerRunning = true;
+    btn.innerHTML = '&#10074;&#10074; Pause';
+    timerInterval = setInterval(() => {
+      timeRemaining--;
+      updateTimerDisplay();
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.innerHTML = '&#9654; Start';
+        showToast(`${phases[currentPhase].name} — Time's up!`);
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-start-btn').innerHTML = '&#9654; Start';
+  timeRemaining = phases[currentPhase].time;
+  updateTimerDisplay();
+}
+
+function nextPhase() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-start-btn').innerHTML = '&#9654; Start';
+  if (currentPhase < phases.length - 1) {
+    currentPhase++;
+    updatePhaseUI();
+  } else {
+    showToast('Protocol complete! Great work.');
+  }
+}
+
+document.querySelectorAll('.phase-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timer-start-btn').innerHTML = '&#9654; Start';
+    currentPhase = parseInt(pill.dataset.phase);
+    updatePhaseUI();
+  });
+});
+
+// Group management
+function switchGroup(idx) {
+  saveNotepad();
+  store.currentGroup = idx;
+  document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-group="${idx}"]`).classList.add('active');
+  loadNotepad();
+  const names = ['A', 'B', 'C', 'D'];
+  document.getElementById('notepad-title').textContent = `Group ${names[idx]} — Consultancy Notepad`;
+}
+
+function saveNotepad() {
+  const g = store.currentGroup;
+  store.groups[g].puzzle = document.getElementById('notepad-puzzle').value;
+  store.groups[g].questions = document.getElementById('notepad-questions').value;
+  store.groups[g].brainstorm = document.getElementById('notepad-brainstorm').value;
+  store.groups[g].reflections = document.getElementById('notepad-reflections').value;
+}
+
+function loadNotepad() {
+  const g = store.currentGroup;
+  document.getElementById('notepad-puzzle').value = store.groups[g].puzzle;
+  document.getElementById('notepad-questions').value = store.groups[g].questions;
+  document.getElementById('notepad-brainstorm').value = store.groups[g].brainstorm;
+  document.getElementById('notepad-reflections').value = store.groups[g].reflections;
+}
+
+// ═══════════════════════════════════════════
+// NEXT STEPS — COMMITMENTS
+// ═══════════════════════════════════════════
+function submitCommitment() {
+  const action = document.getElementById('commitment-action').value.trim();
+  const support = document.getElementById('commitment-support').value.trim();
+  const partner = document.getElementById('commitment-partner').value.trim();
+
+  if (!action) {
+    showToast('Write your commitment before submitting.');
+    return;
+  }
+
+  store.commitments.push({
+    action, support, partner,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+
+  renderCommitments();
+
+  document.getElementById('commitment-action').value = '';
+  document.getElementById('commitment-support').value = '';
+  document.getElementById('commitment-partner').value = '';
+
+  showToast('Commitment locked in!');
+  document.getElementById('dash-nextsteps-status').innerHTML = `&#10148; ${store.commitments.length} commitments made`;
+}
+
+function renderCommitments() {
+  const feed = document.getElementById('commitments-feed');
+  feed.innerHTML = store.commitments.map(c => `
+    <div class="commitment-card">
+      <div class="commit-action">"${c.action}"</div>
+      ${c.partner ? `<div class="commit-timeline">Accountability partner: ${c.partner}</div>` : ''}
+      ${c.support ? `<div class="commit-meta">Needs: ${c.support}</div>` : ''}
+      <div class="commit-meta">Locked in at ${c.time}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+buildScenarios();
+updatePhaseUI();
+
+// ═══════════════════════════════════════════
+// FIREBASE INTEGRATION PLACEHOLDER
+// ═══════════════════════════════════════════
+// FIREBASE INTEGRATION STEPS:
+// 1. Add Firebase SDK to head (firebase-app-compat.js + firebase-database-compat.js)
+// 2. Initialize: firebase.initializeApp({ ...config }); const db = firebase.database();
+// 3. Replace store ops:
+//    - submitStory()     -> db.ref('stories').push(story)
+//    - submitCommitment() -> db.ref('commitments').push(commitment)
+//    - saveNotepad()      -> db.ref('groups/' + store.currentGroup).set(data)
+//    - Listen: db.ref('stories').on('value', snap => renderStories(snap.val()))
+// 4. Deploy: firebase deploy --only hosting
+</script>
+
+</body>
+</html>

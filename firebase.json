@@ -1,0 +1,22 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebase",
+      ".claude",
+      ".DS_Store",
+      "*.pdf",
+      "database.rules.json"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/leadership-lab-companion.html"
+      }
+    ]
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

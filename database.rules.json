@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "groups": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "stories_public": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "commitments_public": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
